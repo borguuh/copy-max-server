@@ -1,5 +1,9 @@
 const express = require("express");
+
 const router = express.Router();
+
+// middleware
+import { requireSignin } from "../middlewares";
 
 const {
   businessPlan,
@@ -11,12 +15,12 @@ const {
   invoice,
 } = require("../controllers/openai");
 
-router.route("/business").post(businessPlan);
-router.route("/marketingPlan").post(marketingPlan);
-router.route("/tweet").post(tweet);
-router.route("/quote").post(quote);
-router.route("/proposal").post(proposal);
-router.route("/insta").post(instaCaption);
-router.route("/invoice").post(invoice);
+router.route("/business").post(requireSignin, businessPlan);
+router.route("/marketingPlan").post(requireSignin, marketingPlan);
+router.route("/tweet").post(requireSignin, tweet);
+router.route("/quote").post(requireSignin, quote);
+router.route("/proposal").post(requireSignin, proposal);
+router.route("/insta").post(requireSignin, instaCaption);
+router.route("/invoice").post(requireSignin, invoice);
 
 module.exports = router;

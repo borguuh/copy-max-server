@@ -1,3 +1,4 @@
+import Project from "../models/project";
 const { Configuration, OpenAIApi } = require("openai");
 const configuration = new Configuration({
   apiKey: process.env.OPENAI_API_SECRET,
@@ -17,6 +18,17 @@ exports.businessPlan = async (req, res) => {
     });
     if (response.data) {
       if (response.data.choices[0].text) {
+        const project = await new Project({
+          type: "business",
+          prompt: {
+            about: about,
+            number: number,
+            timeframe: timeframe,
+            language: language,
+          },
+          response: response.data.choices[0].text,
+          creator: req.user._id,
+        }).save();
         return res.status(200).json(response.data.choices[0].text);
       }
     }
@@ -38,6 +50,17 @@ exports.marketingPlan = async (req, res) => {
     });
     if (response.data) {
       if (response.data.choices[0].text) {
+        const project = await new Project({
+          type: "marketing",
+          prompt: {
+            about: about,
+            number: number,
+            timeframe: timeframe,
+            language: language,
+          },
+          response: response.data.choices[0].text,
+          creator: req.user._id,
+        }).save();
         return res.status(200).json(response.data.choices[0].text);
       }
     }
@@ -59,6 +82,18 @@ exports.tweet = async (req, res) => {
     });
     if (response.data) {
       if (response.data.choices[0].text) {
+        const project = await new Project({
+          type: "tweet",
+          prompt: {
+            about,
+            number,
+            paragraphs,
+            language,
+            tone,
+          },
+          response: response.data.choices[0].text,
+          creator: req.user._id,
+        }).save();
         return res.status(200).json(response.data.choices[0].text);
       }
     }
@@ -80,6 +115,16 @@ exports.quote = async (req, res) => {
     });
     if (response.data) {
       if (response.data.choices[0].text) {
+        const project = await new Project({
+          type: "quote",
+          prompt: {
+            topic,
+            number,
+            language,
+          },
+          response: response.data.choices[0].text,
+          creator: req.user._id,
+        }).save();
         return res.status(200).json(response.data.choices[0].text);
       }
     }
@@ -96,11 +141,24 @@ exports.proposal = async (req, res) => {
     const response = await openai.createCompletion({
       model: "text-davinci-003",
       prompt: `Craft ${number} compelling proposal(s) for a job title of ${title} in ${language} language to win over clients in a company called ${company_name} in ${paragraphs} paragraphs for applying to a job about the following: \n${about}`,
-      max_tokens: 500,
+      max_tokens: 1500,
       temperature: 0.5,
     });
     if (response.data) {
       if (response.data.choices[0].text) {
+        const project = await new Project({
+          type: "proposal",
+          prompt: {
+            about,
+            number,
+            title,
+            language,
+            company_name,
+            paragraphs,
+          },
+          response: response.data.choices[0].text,
+          creator: req.user._id,
+        }).save();
         return res.status(200).json(response.data.choices[0].text);
       }
     }
@@ -111,7 +169,7 @@ exports.proposal = async (req, res) => {
 
 //instaCaption generator
 exports.instaCaption = async (req, res) => {
-  const { about, number, paragraphs, language, tone } = req.body;
+  const { about, number, words, language, tone } = req.body;
 
   try {
     const response = await openai.createCompletion({
@@ -122,6 +180,12 @@ exports.instaCaption = async (req, res) => {
     });
     if (response.data) {
       if (response.data.choices[0].text) {
+        const project = await new Project({
+          type: "insta",
+          prompt: { about, number, words, language, tone },
+          response: response.data.choices[0].text,
+          creator: req.user._id,
+        }).save();
         return res.status(200).json(response.data.choices[0].text);
       }
     }
@@ -143,6 +207,13 @@ exports.invoice = async (req, res) => {
     });
     if (response.data) {
       if (response.data.choices[0].text) {
+        const project = await new Project({
+          type: "invoice",
+          prompt: { about, products, language, words },
+          response: response.data.choices[0].text,
+          creator: req.user._id,
+        }).save();
+
         return res.status(200).json(response.data.choices[0].text);
       }
     }
