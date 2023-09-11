@@ -6,7 +6,6 @@ import cookieParser from "cookie-parser";
 const morgan = require("morgan");
 require("dotenv").config();
 
-
 // create express app
 const app = express();
 
@@ -22,7 +21,15 @@ mongoose
   .catch((err) => console.log("DB CONNECTION ERR => ", err));
 
 // apply middlewares
-app.use(cors());
+app.use(
+  cors({
+    origin: ["https://frontend-coded-zeus.vercel.app", "http://localhost:3000"],
+    credentials: true,
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+    allowedHeaders:
+      "Origin, X-Requested-With, Content-Type, Accept, Authorization, X-CSRF-Token",
+  })
+);
 app.use(express.json());
 app.use(cookieParser());
 app.use(morgan("dev"));
