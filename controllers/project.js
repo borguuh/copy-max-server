@@ -157,11 +157,7 @@ export const deleteProject = async (req, res) => {
     const project = await Project.findOne({ _id }).select("creator").exec();
     const user = await User.findOne({ _id: req.user._id });
 
-    if (
-      project.creator._id != req.user._id ||
-      user.role === "Admin" ||
-      user.role === "Dev"
-    ) {
+    if (project.creator._id != req.user._id) {
       return res.status(400).send("Unauthorized");
     }
 
@@ -195,3 +191,5 @@ export const update = async (req, res) => {
     return res.status(400).send(err.message);
   }
 };
+
+// Send to email

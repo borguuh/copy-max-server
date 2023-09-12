@@ -46,7 +46,7 @@ export const update = async (req, res) => {
     }).exec();
 
     const updated = await User.findById(userId)
-      .select("-password -passwordResetCode -role -bookmarks -projects")
+      .select("-password -passwordResetCode")
       .exec();
 
     res.json(updated);
@@ -61,7 +61,7 @@ export const deleteUser = async (req, res) => {
 
   const user = await User.findOne({ _id: req.user._id });
 
-  if (_id != req.user._id || user.role === "Admin" || user.role === "Dev") {
+  if (_id != req.user._id) {
     return res.status(400).send("Unauthorized");
   }
 

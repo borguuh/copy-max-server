@@ -47,7 +47,7 @@ const userSchema = new Schema(
       type: String,
     },
     dob: {
-      type: String,
+      type: Date,
     },
     email: {
       type: String,
@@ -67,9 +67,9 @@ const userSchema = new Schema(
       default: "/avatar.png",
     },
     role: {
-      type: [String],
-      default: ["User"],
-      enum: ["User", "Pro", "Dev", "Admin"],
+      type: String,
+      default: "User",
+      enum: ["user", "pro", "dev", "admin"],
     },
     passwordResetCode: {
       data: String,

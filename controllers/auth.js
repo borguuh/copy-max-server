@@ -63,9 +63,12 @@ export const login = async (req, res) => {
     // return user and token to client, exclude hashed password
     user.password = undefined;
     // send token in cookie
+
     res.cookie("token", token, {
-      httpOnly: true,
-      // secure: true, // only works on https
+      sameSite: "none",
+      secure: process.env.NODE_ENV !== "development", // only works on https
+      expires: new Date(Date.now() + 8 * 3600000), // cookie will be removed after 8 hours
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
     });
     // send user as json response
     res.json(user);
