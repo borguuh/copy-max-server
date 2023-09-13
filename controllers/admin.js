@@ -25,7 +25,7 @@ export const getSubscribedUsers = async (req, res) => {
   try {
     // Find users with the role "pro"
     const subscribedUsers = await User.find(
-      { role: "pro" },
+      { subscription: "lite" || "pro" || "elite" },
       "-password -passwordResetCode"
     );
 
@@ -40,7 +40,7 @@ export const getUnsubscribedUsers = async (req, res) => {
   try {
     // Find users with the role "user"
     const unsubscribedUsers = await User.find(
-      { role: "user" },
+      { subscription: "free" },
       "-password -passwordResetCode"
     );
 

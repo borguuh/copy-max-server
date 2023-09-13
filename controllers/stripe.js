@@ -1,4 +1,4 @@
-const User = require("../models/user");
+import User from "../models/user";
 
 const stripe = require("stripe")(process.env.STRIPE_SECRET);
 const DOMAIN = "http://localhost:3000";
