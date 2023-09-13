@@ -13,6 +13,8 @@ import {
   currentUser,
   forgotPassword,
   resetPassword,
+  getSubscription,
+  getCustomer,
 } from "../controllers/auth";
 
 router.post("/register", register);

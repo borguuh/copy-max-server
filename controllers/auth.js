@@ -172,7 +172,7 @@ export const resetPassword = async (req, res) => {
   }
 };
 
-exports.getSubscription = async (req, res, next) => {
+export const getSubscription = async (req, res, next) => {
   try {
     const user = await User.findById(req.user._id);
     res.status(200).json({ subscription: user.subscription });
@@ -181,7 +181,7 @@ exports.getSubscription = async (req, res, next) => {
   }
 };
 
-exports.getCustomer = async (req, res, next) => {
+export const getCustomer = async (req, res, next) => {
   try {
     const user = await User.findById(req.user._id);
     res.status(200).json({ customerId: user.customerId });
