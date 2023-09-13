@@ -68,8 +68,17 @@ const userSchema = new Schema(
     },
     role: {
       type: String,
-      default: "User",
-      enum: ["user", "pro", "dev", "admin"],
+      default: "user",
+      enum: ["user", "dev", "admin"],
+    },
+    customerId: {
+      type: String,
+      default: "",
+    },
+    subscription: {
+      type: String,
+      default: "free",
+      enum: ["free", "lite", "pro", "elite"],
     },
     passwordResetCode: {
       data: String,

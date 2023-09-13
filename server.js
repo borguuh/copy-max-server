@@ -3,6 +3,7 @@ import cors from "cors";
 import { readdirSync } from "fs";
 import mongoose from "mongoose";
 import cookieParser from "cookie-parser";
+const bodyParser = require("body-parser");
 const morgan = require("morgan");
 require("dotenv").config();
 
@@ -23,7 +24,7 @@ mongoose
 // apply middlewares
 app.use(
   cors({
-    origin: ["https://frontend-coded-zeus.vercel.app", "http://localhost:3000"],
+    origin: ["https://copy-max-ai.vercel.app", "http://localhost:3000"],
     credentials: true,
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
     allowedHeaders:
@@ -33,6 +34,14 @@ app.use(
 app.use(express.json());
 app.use(cookieParser());
 app.use(morgan("dev"));
+app.use(bodyParser.urlencoded({ extended: true }));
+
+var rawBodySaver = function (req, res, buf, encoding) {
+  if (buf && buf.length) {
+    req.rawBody = buf.toString(encoding || "utf8");
+  }
+};
+app.use(bodyParser.json({ verify: rawBodySaver, extended: true }));
 
 // route
 readdirSync("./routes").map((r) => app.use("/api", require(`./routes/${r}`)));

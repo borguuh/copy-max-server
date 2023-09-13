@@ -21,5 +21,7 @@ router.get("/logout", logout);
 router.get("/current-user", requireSignin, currentUser);
 router.post("/forgot-password", forgotPassword);
 router.post("/reset-password", resetPassword);
+router.get("/subscription", requireSignin, getSubscription);
+router.get("/customer", requireSignin, getCustomer);
 
 module.exports = router;

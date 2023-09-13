@@ -171,3 +171,21 @@ export const resetPassword = async (req, res) => {
     return res.status(400).send("Error! Try again.");
   }
 };
+
+exports.getSubscription = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user._id);
+    res.status(200).json({ subscription: user.subscription });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getCustomer = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user._id);
+    res.status(200).json({ customerId: user.customerId });
+  } catch (err) {
+    next(err);
+  }
+};
