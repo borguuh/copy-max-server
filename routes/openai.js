@@ -13,6 +13,9 @@ const {
   proposal,
   instaCaption,
   invoice,
+  linkedin,
+  ads,
+  paraphrase,
 } = require("../controllers/openai");
 
 router.route("/business").post(requireSignin, businessPlan);
@@ -22,5 +25,8 @@ router.route("/quote").post(requireSignin, quote);
 router.route("/proposal").post(requireSignin, proposal);
 router.route("/insta").post(requireSignin, instaCaption);
 router.route("/invoice").post(requireSignin, invoice);
+router.route("/linkedin").post(requireSignin, linkedin);
+router.route("/ads").post(requireSignin, ads);
+router.route("/paraphrase").post(requireSignin, paraphrase);
 
 module.exports = router;

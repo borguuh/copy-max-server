@@ -221,3 +221,102 @@ exports.invoice = async (req, res) => {
     return res.status(404).json({ message: err.message });
   }
 };
+
+//linkedin generator
+exports.linkedin = async (req, res) => {
+  const { about, paragraphs, language, tone } = req.body;
+
+  try {
+    const response = await openai.createCompletion({
+      model: "text-davinci-003",
+      prompt: `Generate a linkedin post in a ${tone} tone in ${language} language in ${paragraphs} paragraphs that talks about: \n${about}`,
+      max_tokens: 500,
+      temperature: 0.5,
+    });
+    if (response.data) {
+      if (response.data.choices[0].text) {
+        const project = await new Project({
+          type: "linkedin",
+          prompt: {
+            about,
+            number,
+            paragraphs,
+            language,
+            tone,
+          },
+          response: response.data.choices[0].text,
+          creator: req.user._id,
+        }).save();
+        return res.status(200).json(response.data.choices[0].text);
+      }
+    }
+  } catch (err) {
+    return res.status(404).json({ message: err.message });
+  }
+};
+
+//ads generator
+exports.ads = async (req, res) => {
+  const { objective, audience, platform } = req.body;
+
+  try {
+    const response = await openai.createCompletion({
+      model: "text-davinci-003",
+      prompt: `Generate an advert content for the objective "${objective}" whose target audience is "${audience}" knowing that the ads platform is ${platform}`,
+      max_tokens: 500,
+      temperature: 0.5,
+    });
+    if (response.data) {
+      if (response.data.choices[0].text) {
+        const project = await new Project({
+          type: "ads",
+          prompt: {
+            about,
+            number,
+            paragraphs,
+            language,
+            tone,
+          },
+          response: response.data.choices[0].text,
+          creator: req.user._id,
+        }).save();
+        return res.status(200).json(response.data.choices[0].text);
+      }
+    }
+  } catch (err) {
+    return res.status(404).json({ message: err.message });
+  }
+};
+
+//paraphraser
+exports.paraphrase = async (req, res) => {
+  const { input } = req.body;
+
+  try {
+    const response = await openai.createCompletion({
+      model: "text-davinci-003",
+      prompt: `paraphrase the following "${input}"`,
+      max_tokens: 500,
+      temperature: 0.5,
+    });
+    if (response.data) {
+      if (response.data.choices[0].text) {
+        const project = await new Project({
+          type: "paraphrase",
+          prompt: {
+            about,
+            number,
+            paragraphs,
+            language,
+            tone,
+          },
+          response: response.data.choices[0].text,
+          creator: req.user._id,
+        }).save();
+        return res.status(200).json(response.data.choices[0].text);
+      }
+    }
+  } catch (err) {
+    return res.status(404).json({ message: err.message });
+  }
+};
