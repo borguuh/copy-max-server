@@ -60,6 +60,12 @@ const userSchema = new Schema(
       required: true,
       min: 6,
       max: 64,
+      select: false,
+    },
+    emailCode: {
+      data: String,
+      default: "",
+      select: false,
     },
     image: {},
     picture: {
@@ -83,6 +89,7 @@ const userSchema = new Schema(
     passwordResetCode: {
       data: String,
       default: "",
+      select: false,
     },
     stripe_account_id: "",
     stripe_seller: {},

@@ -15,6 +15,8 @@ import {
   resetPassword,
   getSubscription,
   getCustomer,
+  emailLogin,
+  verifyEmail,
 } from "../controllers/auth";
 
 router.post("/register", register);
@@ -25,5 +27,7 @@ router.post("/forgot-password", forgotPassword);
 router.post("/reset-password", resetPassword);
 router.get("/subscription", requireSignin, getSubscription);
 router.get("/customer", requireSignin, getCustomer);
+router.post("/email/login", emailLogin);
+router.post("/email/verify", verifyEmail);
 
 module.exports = router;

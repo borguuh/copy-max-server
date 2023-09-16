@@ -189,3 +189,92 @@ export const getCustomer = async (req, res, next) => {
     next(err);
   }
 };
+
+export const emailLogin = async (req, res) => {
+  try {
+    const { email } = req.body;
+    // console.log(email);
+    const shortCode = nanoid(6).toUpperCase();
+    const user = await User.findOneAndUpdate(
+      { email },
+      { emailCode: shortCode }
+    );
+    if (!user) return res.status(400).send("User not found");
+
+    // prepare for email
+    const params = {
+      Source: process.env.EMAIL_FROM,
+      Destination: {
+        ToAddresses: [email],
+      },
+      Message: {
+        Body: {
+          Html: {
+            Charset: "UTF-8",
+            Data: `
+                <html>
+                  <h1>Login short code </h1>
+                  <p> Please use this code to login to your account</p>
+                  <h2 style="color:red;">${shortCode}</h2>
+                  <i>copymax.ai</i>
+                </html>
+              `,
+          },
+        },
+        Subject: {
+          Charset: "UTF-8",
+          Data: "Login Code",
+        },
+      },
+    };
+
+    const emailSent = SES.sendEmail(params).promise();
+    emailSent
+      .then((data) => {
+        console.log(data);
+        res.json({ ok: true });
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+export const verifyEmail = async (req, res) => {
+  try {
+    // console.log(req.body);
+    const { email, code } = req.body;
+
+    // check password
+    const user = User.findOneAndUpdate(
+      {
+        email,
+        emailCode: code,
+      },
+      {
+        emailCode: "",
+      }
+    ).exec();
+    // create signed jwt
+    const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "7d",
+    });
+    // return user and token to client, exclude hashed password
+    user.password = undefined;
+    // send token in cookie
+
+    res.cookie("token", token, {
+      sameSite: "none",
+      secure: process.env.NODE_ENV !== "development", // only works on https
+      expires: new Date(Date.now() + 8 * 3600000), // cookie will be removed after 8 hours
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    });
+    // send user as json response
+    res.json(user);
+  } catch (err) {
+    console.log(err);
+    return res.status(400).send("Error! Try again.");
+  }
+};
