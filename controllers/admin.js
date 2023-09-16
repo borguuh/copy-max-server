@@ -113,4 +113,44 @@ export const deleteUser = async (req, res) => {
   }
 };
 
-// Find all projects
+// promote User To Admin;
+export const promoteUserToAdmin = async (req, res) => {
+  try {
+    const userId = req.params.userId;
+
+    // Check if the user exists
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Update the user's role to 'admin'
+    user.role = "admin";
+    await user.save();
+
+    res.status(200).json({ message: "User role updated to admin" });
+  } catch (error) {
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// demote Admin To User
+export const demoteAdminToUser = async (req, res) => {
+  try {
+    const userId = req.params.userId;
+
+    // Check if the user exists
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Update the user's role to 'user'
+    user.role = "user";
+    await user.save();
+
+    res.status(200).json({ message: "Admin role updated to user" });
+  } catch (error) {
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
