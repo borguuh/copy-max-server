@@ -60,7 +60,6 @@ const userSchema = new Schema(
       required: true,
       min: 6,
       max: 64,
-      select: false,
     },
     emailCode: {
       data: String,
