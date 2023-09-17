@@ -239,7 +239,6 @@ exports.linkedin = async (req, res) => {
           type: "linkedin",
           prompt: {
             about,
-            number,
             paragraphs,
             language,
             tone,
@@ -271,11 +270,9 @@ exports.ads = async (req, res) => {
         const project = await new Project({
           type: "ads",
           prompt: {
-            about,
-            number,
-            paragraphs,
-            language,
-            tone,
+            objective, 
+            audience, 
+            platform,
           },
           response: response.data.choices[0].text,
           creator: req.user._id,
@@ -304,11 +301,7 @@ exports.paraphrase = async (req, res) => {
         const project = await new Project({
           type: "paraphrase",
           prompt: {
-            about,
-            number,
-            paragraphs,
-            language,
-            tone,
+            input,
           },
           response: response.data.choices[0].text,
           creator: req.user._id,
