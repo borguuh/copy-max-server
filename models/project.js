@@ -19,6 +19,9 @@ const projectSchema = new mongoose.Schema(
         "paraphrase",
       ],
     },
+    name: {
+      type: String,
+    },
     prompt: {},
     response: {
       type: String,

@@ -7,7 +7,7 @@ const openai = new OpenAIApi(configuration);
 
 //business plan generator
 exports.businessPlan = async (req, res) => {
-  const { about, number, timeframe, language } = req.body;
+  const { about, number, timeframe, language, name } = req.body;
 
   try {
     const response = await openai.createCompletion({
@@ -20,6 +20,7 @@ exports.businessPlan = async (req, res) => {
       if (response.data.choices[0].text) {
         const project = await new Project({
           type: "business",
+          name,
           prompt: {
             about: about,
             number: number,
@@ -39,7 +40,7 @@ exports.businessPlan = async (req, res) => {
 
 //marketing plan generator
 exports.marketingPlan = async (req, res) => {
-  const { about, number, timeframe, language } = req.body;
+  const { about, number, timeframe, language, name } = req.body;
 
   try {
     const response = await openai.createCompletion({
@@ -52,6 +53,7 @@ exports.marketingPlan = async (req, res) => {
       if (response.data.choices[0].text) {
         const project = await new Project({
           type: "marketing",
+          name,
           prompt: {
             about: about,
             number: number,
@@ -71,7 +73,7 @@ exports.marketingPlan = async (req, res) => {
 
 //tweet generator
 exports.tweet = async (req, res) => {
-  const { about, number, paragraphs, language, tone } = req.body;
+  const { about, number, paragraphs, language, tone, name } = req.body;
 
   try {
     const response = await openai.createCompletion({
@@ -84,6 +86,7 @@ exports.tweet = async (req, res) => {
       if (response.data.choices[0].text) {
         const project = await new Project({
           type: "tweet",
+          name,
           prompt: {
             about,
             number,
@@ -104,7 +107,7 @@ exports.tweet = async (req, res) => {
 
 //quote generator
 exports.quote = async (req, res) => {
-  const { topic, number, language } = req.body;
+  const { topic, number, language, name } = req.body;
 
   try {
     const response = await openai.createCompletion({
@@ -117,6 +120,7 @@ exports.quote = async (req, res) => {
       if (response.data.choices[0].text) {
         const project = await new Project({
           type: "quote",
+          name,
           prompt: {
             topic,
             number,
@@ -135,7 +139,8 @@ exports.quote = async (req, res) => {
 
 //proposal generator
 exports.proposal = async (req, res) => {
-  const { about, number, title, language, company_name, paragraphs } = req.body;
+  const { about, number, title, language, company_name, paragraphs, name } =
+    req.body;
 
   try {
     const response = await openai.createCompletion({
@@ -148,6 +153,7 @@ exports.proposal = async (req, res) => {
       if (response.data.choices[0].text) {
         const project = await new Project({
           type: "proposal",
+          name,
           prompt: {
             about,
             number,
@@ -169,7 +175,7 @@ exports.proposal = async (req, res) => {
 
 //instaCaption generator
 exports.instaCaption = async (req, res) => {
-  const { about, number, words, language, tone } = req.body;
+  const { about, number, words, language, tone, name } = req.body;
 
   try {
     const response = await openai.createCompletion({
@@ -182,6 +188,7 @@ exports.instaCaption = async (req, res) => {
       if (response.data.choices[0].text) {
         const project = await new Project({
           type: "insta",
+          name,
           prompt: { about, number, words, language, tone },
           response: response.data.choices[0].text,
           creator: req.user._id,
@@ -196,7 +203,7 @@ exports.instaCaption = async (req, res) => {
 
 //invoice generator
 exports.invoice = async (req, res) => {
-  const { about, products, language, words } = req.body;
+  const { about, products, language, words, name } = req.body;
 
   try {
     const response = await openai.createCompletion({
@@ -209,6 +216,7 @@ exports.invoice = async (req, res) => {
       if (response.data.choices[0].text) {
         const project = await new Project({
           type: "invoice",
+          name,
           prompt: { about, products, language, words },
           response: response.data.choices[0].text,
           creator: req.user._id,
@@ -224,7 +232,7 @@ exports.invoice = async (req, res) => {
 
 //linkedin generator
 exports.linkedin = async (req, res) => {
-  const { about, paragraphs, language, tone } = req.body;
+  const { about, paragraphs, language, tone, name } = req.body;
 
   try {
     const response = await openai.createCompletion({
@@ -237,6 +245,7 @@ exports.linkedin = async (req, res) => {
       if (response.data.choices[0].text) {
         const project = await new Project({
           type: "linkedin",
+          name,
           prompt: {
             about,
             paragraphs,
@@ -256,7 +265,7 @@ exports.linkedin = async (req, res) => {
 
 //ads generator
 exports.ads = async (req, res) => {
-  const { objective, audience, platform } = req.body;
+  const { objective, audience, platform, name } = req.body;
 
   try {
     const response = await openai.createCompletion({
@@ -269,9 +278,10 @@ exports.ads = async (req, res) => {
       if (response.data.choices[0].text) {
         const project = await new Project({
           type: "ads",
+          name,
           prompt: {
-            objective, 
-            audience, 
+            objective,
+            audience,
             platform,
           },
           response: response.data.choices[0].text,
@@ -287,7 +297,7 @@ exports.ads = async (req, res) => {
 
 //paraphraser
 exports.paraphrase = async (req, res) => {
-  const { input } = req.body;
+  const { input, name } = req.body;
 
   try {
     const response = await openai.createCompletion({
@@ -300,6 +310,7 @@ exports.paraphrase = async (req, res) => {
       if (response.data.choices[0].text) {
         const project = await new Project({
           type: "paraphrase",
+          name,
           prompt: {
             input,
           },

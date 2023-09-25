@@ -24,7 +24,7 @@ mongoose
 // apply middlewares
 app.use(
   cors({
-    origin: ["https://copy-max-ai.vercel.app", "http://localhost:3000"],
+    origin: [process.env.DOMAIN, "http://localhost:3000"],
     credentials: true,
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
     allowedHeaders:

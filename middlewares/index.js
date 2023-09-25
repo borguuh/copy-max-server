@@ -31,7 +31,7 @@ export const checkFreePlanUsage = async (req, res, next) => {
     const daysDifference = Math.ceil(timeDifference / (1000 * 60 * 60 * 24));
 
     // Check if the user is on the "free" plan and has used up to three days
-    if (user.subscription === "free" && daysDifference >= 3) {
+    if (user.subscription === "free" && daysDifference >= 14) {
       return res
         .status(403)
         .json({ message: "Please upgrade to a paid plan to continue" });
