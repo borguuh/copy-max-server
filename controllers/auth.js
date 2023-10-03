@@ -41,6 +41,7 @@ export const register = async (req, res) => {
       emailVerificationCode: verificationCode, // Store the verification code in the user document
       emailVerified: false,
     });
+    await user.save();
 
     // Prepare the email for sending
     const params = {
@@ -71,7 +72,7 @@ export const register = async (req, res) => {
 
     // Send the email with the verification code
     await SES.sendEmail(params).promise();
-    await user.save();
+
     // Send a response to the frontend
     return res.status(200).json({
       message:
