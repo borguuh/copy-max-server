@@ -31,7 +31,7 @@ export const register = async (req, res) => {
     const hashedPassword = await hashPassword(password);
 
     // Generate a verification code
-    const verificationCode = nanoid(6).toUpperCase();
+    const verificationCode = await nanoid(6).toUpperCase();
 
     // register
     const user = new User({
