@@ -128,22 +128,71 @@ export const login = async (req, res) => {
     const match = await comparePassword(password, user.password);
     if (!match) return res.status(400).send("Wrong password");
 
-    // create signed jwt
-    const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "7d",
-    });
-    // return user and token to client, exclude hashed password
-    user.password = undefined;
-    // send token in cookie
+    // generate a 6-digit code
+    const shortCode = nanoid(6).toUpperCase();
 
-    res.cookie("token", token, {
-      sameSite: "none",
-      secure: process.env.NODE_ENV !== "development", // only works on https
-      expires: new Date(Date.now() + 8 * 3600000), // cookie will be removed after 8 hours
-      maxAge: 24 * 60 * 60 * 1000, // 24 hours
-    });
-    // send user as json response
-    res.json(user);
+    // Update the user with the generated code
+    user.twoFactorCode = shortCode;
+    await user.save();
+
+    // Prepare the email for sending
+    const params = {
+      Source: process.env.EMAIL_FROM,
+      Destination: {
+        ToAddresses: [email],
+      },
+      Message: {
+        Body: {
+          Html: {
+            Charset: "UTF-8",
+            Data: `
+                <html>
+                  <h1>Two-Factor Authentication Code</h1>
+                  <p>Use this code to confirm log in:</p>
+                  <h2 style="color:red;">${shortCode}</h2>
+                  <i>app.copymax.io</i>
+                </html>
+              `,
+          },
+        },
+        Subject: {
+          Charset: "UTF-8",
+          Data: "Two-Factor Authentication Code",
+        },
+      },
+    };
+
+    // Send the email with the code
+    const emailSent = SES.sendEmail(params).promise();
+    emailSent
+      .then((data) => {
+        req.twoFactorAuthCode = shortCode; // Store the code in the request for later verification
+        // If the email is sent successfully, send a response to the frontend
+        return res.status(200).json({
+          message:
+            "Please check your email for the Two Factor Authentication Code.",
+        });
+      })
+      .catch((err) => {
+        console.error(err);
+        res.status(500).json({ message: "Failed to send 2FA code via email" });
+      });
+    // create signed jwt
+    // const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
+    //   expiresIn: "7d",
+    // });
+    // // return user and token to client, exclude hashed password
+    // user.password = undefined;
+    // // send token in cookie
+
+    // res.cookie("token", token, {
+    //   sameSite: "none",
+    //   secure: process.env.NODE_ENV !== "development", // only works on https
+    //   expires: new Date(Date.now() + 8 * 3600000), // cookie will be removed after 8 hours
+    //   maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    // });
+    // // send user as json response
+    // res.json(user);
   } catch (err) {
     console.log(err);
     return res.status(400).send("Error. Try again.");

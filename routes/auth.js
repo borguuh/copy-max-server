@@ -29,7 +29,7 @@ import {
 
 router.post("/register", register);
 router.post("/register/verify", verifySignup);
-router.post("/login", checkTwoFactorAuth, checkEmailVerification, login);
+router.post("/login", checkEmailVerification, login);
 router.get("/logout", logout);
 router.get("/current-user", requireSignin, currentUser);
 router.post("/forgot-password", forgotPassword);
