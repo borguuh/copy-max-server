@@ -62,7 +62,7 @@ const userSchema = new Schema(
       max: 64,
     },
     emailCode: {
-      data: String,
+      type: String,
       default: "",
       select: false,
     },
@@ -95,12 +95,12 @@ const userSchema = new Schema(
       default: false,
     },
     twoFactorCode: {
-      data: String,
+      type: String,
       default: "",
       select: false,
     },
     emailVerificationCode: {
-      data: String,
+      type: String,
       default: "",
     },
     emailVerified: {
