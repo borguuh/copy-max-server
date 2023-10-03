@@ -30,18 +30,90 @@ export const register = async (req, res) => {
     // hash password
     const hashedPassword = await hashPassword(password);
 
+    // Generate a verification code
+    const verificationCode = nanoid(6).toUpperCase();
+
     // register
     const user = new User({
       name,
       email,
       password: hashedPassword,
+      emailVerificationCode: verificationCode, // Store the verification code in the user document
+      emailVerified: false,
     });
+
+    // Prepare the email for sending
+    const params = {
+      Source: process.env.EMAIL_FROM,
+      Destination: {
+        ToAddresses: [email],
+      },
+      Message: {
+        Body: {
+          Html: {
+            Charset: "UTF-8",
+            Data: `
+              <html>
+                <h1>Email Verification Code</h1>
+                <p>Please use this code to verify your email:</p>
+                <h2 style="color:red;">${verificationCode}</h2>
+                <i>app.copymax.io</i>
+              </html>
+            `,
+          },
+        },
+        Subject: {
+          Charset: "UTF-8",
+          Data: "Email Verification Code",
+        },
+      },
+    };
+
+    // Send the email with the verification code
+    await SES.sendEmail(params).promise();
     await user.save();
-    // console.log("saved user", user);
-    return res.json({ ok: true });
+    // Send a response to the frontend
+    return res.status(200).json({
+      message:
+        "Registration successful. Check your email for the verification code.",
+    });
   } catch (err) {
     console.log(err);
     return res.status(400).send("Error. Try again.");
+  }
+};
+
+export const verifySignup = async (req, res) => {
+  try {
+    const { email, verificationCode } = req.body;
+
+    // Find the user by their email
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Check if the provided verification code matches the stored code
+    if (user.emailVerificationCode === verificationCode) {
+      // Update the user's email verification status to true
+      user.emailVerified = true;
+
+      // Clear the email verification code as it's no longer needed
+      user.emailVerificationCode = "";
+
+      // Save the updated user document
+      await user.save();
+
+      return res.status(200).json({
+        message: "Email verification successful. You can now log in.",
+      });
+    } else {
+      return res.status(400).json({ message: "Invalid verification code" });
+    }
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Internal server error" });
   }
 };
 
@@ -121,9 +193,9 @@ export const forgotPassword = async (req, res) => {
             Data: `
                 <html>
                   <h1>Reset password</h1>
-                  <p>User this code to reset your password</p>
+                  <p>Please use this code to reset your password</p>
                   <h2 style="color:red;">${shortCode}</h2>
-                  <i>copymax.com</i>
+                  <i>app.copymax.io</i>
                 </html>
               `,
           },
@@ -216,7 +288,7 @@ export const emailLogin = async (req, res) => {
                   <h1>Login short code </h1>
                   <p> Please use this code to login to your account</p>
                   <h2 style="color:red;">${shortCode}</h2>
-                  <i>copymax.ai</i>
+                  <i>app.copymax.io</i>
                 </html>
               `,
           },
@@ -255,6 +327,103 @@ export const verifyEmail = async (req, res) => {
       },
       {
         emailCode: "",
+      }
+    ).exec();
+    // create signed jwt
+    const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "7d",
+    });
+    // return user and token to client, exclude hashed password
+    user.password = undefined;
+    // send token in cookie
+
+    res.cookie("token", token, {
+      sameSite: "none",
+      secure: process.env.NODE_ENV !== "development", // only works on https
+      expires: new Date(Date.now() + 8 * 3600000), // cookie will be removed after 8 hours
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    });
+    // send user as json response
+    res.json(user);
+  } catch (err) {
+    console.log(err);
+    return res.status(400).send("Error! Try again.");
+  }
+};
+
+export const enableTwoFactorAuth = async (req, res) => {
+  try {
+    // Find the user by their ID
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Check if 2FA is already enabled for the user
+    if (user.twoFactorAuthEnabled) {
+      return res.status(400).json({
+        message: "Two-Factor Authentication is already enabled for this user",
+      });
+    }
+
+    user.twoFactorAuthEnabled = true;
+
+    // Save the user document with the updated 2FA information
+    await user.save();
+
+    return res.status(200).json({
+      message: "Two-Factor Authentication has been enabled for this user",
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const disableTwoFactorAuth = async (req, res) => {
+  try {
+    // Find the user by their ID
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Check if 2FA is already enabled for the user
+    if (!user.twoFactorAuthEnabled) {
+      return res.status(400).json({
+        message: "Two-Factor Authentication is already disabled for this user",
+      });
+    }
+
+    user.twoFactorAuthEnabled = false;
+
+    // Save the user document with the updated 2FA information
+    await user.save();
+
+    return res.status(200).json({
+      message: "Two-Factor Authentication has been disabled for this user",
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const twoFactorAuth = async (req, res) => {
+  try {
+    // console.log(req.body);
+    const { email, code } = req.body;
+
+    // check code
+    const user = User.findOneAndUpdate(
+      {
+        email,
+        twoFactorCode: code,
+      },
+      {
+        twoFactorCode: "",
       }
     ).exec();
     // create signed jwt

@@ -90,6 +90,23 @@ const userSchema = new Schema(
       default: "",
       select: false,
     },
+    twoFactorAuthEnabled: {
+      type: Boolean,
+      default: false,
+    },
+    twoFactorCode: {
+      data: String,
+      default: "",
+      select: false,
+    },
+    emailVerificationCode: {
+      data: String,
+      default: "",
+    },
+    emailVerified: {
+      type: Boolean,
+      default: false,
+    },
     stripe_account_id: "",
     stripe_seller: {},
     stripeSession: {},

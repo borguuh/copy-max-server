@@ -1,5 +1,9 @@
 import expressJwt from "express-jwt";
+import { nanoid } from "nanoid";
+import AWS from "aws-sdk";
 import User from "../models/user";
+
+const SES = new AWS.SES(awsConfig);
 
 export const requireSignin = expressJwt({
   getToken: (req, res) => {
@@ -65,6 +69,107 @@ export const isAdmin = async (req, res, next) => {
       });
     }
   } catch (error) {
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const checkTwoFactorAuth = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+
+    // Check if the user with the provided email exists
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(400).json({ message: "User not found" });
+    }
+
+    // Check if 2FA is enabled for the user
+    if (user.twoFactorAuthEnabled) {
+      // If 2FA is enabled, generate a 6-digit code
+      const shortCode = nanoid(6).toUpperCase();
+
+      // Update the user's passwordResetCode field with the generated code
+      user.twoFactorCode = shortCode;
+      await user.save();
+
+      // Prepare the email for sending
+      const params = {
+        Source: process.env.EMAIL_FROM,
+        Destination: {
+          ToAddresses: [email],
+        },
+        Message: {
+          Body: {
+            Html: {
+              Charset: "UTF-8",
+              Data: `
+                <html>
+                  <h1>Two-Factor Authentication Code</h1>
+                  <p>Use this code to log in:</p>
+                  <h2 style="color:red;">${shortCode}</h2>
+                  <i>app.copymax.io</i>
+                </html>
+              `,
+            },
+          },
+          Subject: {
+            Charset: "UTF-8",
+            Data: "Two-Factor Authentication Code",
+          },
+        },
+      };
+
+      // Send the email with the code
+      const emailSent = SES.sendEmail(params).promise();
+      emailSent
+        .then((data) => {
+          req.twoFactorAuthCode = shortCode; // Store the code in the request for later verification
+          // If the email is sent successfully, send a response to the frontend
+          return res.status(200).json({
+            message:
+              "Please check your email for the Two Factor Authentication Code.",
+          });
+        })
+        .catch((err) => {
+          console.error(err);
+          res
+            .status(500)
+            .json({ message: "Failed to send 2FA code via email" });
+        });
+    } else {
+      // If 2FA is not enabled, proceed with login
+      next();
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const checkEmailVerification = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+
+    // Find the user by their email
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Check if the user's email has been verified
+    if (!user.emailVerified) {
+      return res.status(401).json({
+        message:
+          "Email not verified. Please check your email for the verification code.",
+      });
+    }
+
+    // If the email is verified, proceed with login
+    next();
+  } catch (error) {
+    console.error(error);
     return res.status(500).json({ message: "Internal server error" });
   }
 };
