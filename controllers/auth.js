@@ -467,7 +467,7 @@ export const twoFactorAuth = async (req, res) => {
     const { email, code } = req.body;
 
     // check code
-    const user = User.findOneAndUpdate(
+    const user = await User.findOneAndUpdate(
       {
         email,
         twoFactorCode: code,
@@ -476,6 +476,13 @@ export const twoFactorAuth = async (req, res) => {
         twoFactorCode: "",
       }
     ).exec();
+
+     if (!user) {
+       return res
+         .status(404)
+         .json({ message: "User not found or invalid code" });
+     }
+
     // create signed jwt
     const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
       expiresIn: "7d",
