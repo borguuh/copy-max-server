@@ -1,9 +1,6 @@
 import expressJwt from "express-jwt";
-import { nanoid } from "nanoid";
-import AWS from "aws-sdk";
-import User from "../models/user";
 
-const SES = new AWS.SES(awsConfig);
+import User from "../models/user";
 
 export const requireSignin = expressJwt({
   getToken: (req, res) => {

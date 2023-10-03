@@ -3,11 +3,7 @@ import express from "express";
 const router = express.Router();
 
 // middleware
-import {
-  requireSignin,
-  checkTwoFactorAuth,
-  checkEmailVerification,
-} from "../middlewares";
+import { requireSignin, checkEmailVerification } from "../middlewares";
 
 // controllers
 import {
