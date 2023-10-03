@@ -318,10 +318,10 @@ export const emailLogin = async (req, res) => {
     // console.log(email);
     const shortCode = nanoid(6).toUpperCase();
     const user = await User.findOneAndUpdate(
-      { email },
+      { email: email },
       { emailCode: shortCode }
     );
-    if (!user) return res.status(400).send("User not found");
+    if (!user) return res.status(404).send("User not found");
 
     // prepare for email
     const params = {
@@ -477,11 +477,11 @@ export const twoFactorAuth = async (req, res) => {
       }
     ).exec();
 
-     if (!user) {
-       return res
-         .status(404)
-         .json({ message: "User not found or invalid code" });
-     }
+    if (!user) {
+      return res
+        .status(404)
+        .json({ message: "User not found or invalid code" });
+    }
 
     // create signed jwt
     const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
@@ -489,6 +489,10 @@ export const twoFactorAuth = async (req, res) => {
     });
     // return user and token to client, exclude hashed password
     user.password = undefined;
+    user.emailVerificationCode = undefined;
+    user.twoFactorCode = undefined;
+
+    // twoFactorCode
     // send token in cookie
 
     res.cookie("token", token, {
