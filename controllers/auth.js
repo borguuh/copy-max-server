@@ -320,7 +320,7 @@ export const emailLogin = async (req, res) => {
     const user = await User.findOneAndUpdate(
       { email: email },
       { emailCode: shortCode }
-    );
+    ).exec();
     if (!user) return res.status(404).send("User not found");
 
     // prepare for email
